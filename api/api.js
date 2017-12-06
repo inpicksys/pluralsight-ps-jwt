@@ -1,6 +1,8 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+mongoose.Promise = require('bluebird');
+
 var User = require('./models/User.js');
 
 var app = express();
@@ -16,7 +18,7 @@ app.use(function(req, res, next){
 });
 
 
-app.post('/register', function(req, res){
+app.post ('/register', function(req, res){
     var user = req.body;
     var newUser = new User.model({
         email: user.email,
@@ -24,11 +26,21 @@ app.post('/register', function(req, res){
     });
 
     newUser.save(function(err){
-        res.status(200).json(newUser);
+        res.status(200).send(newUser.toJSON());
     });
 });
 
-mongoose.connect('mongodb://localhost/psjwt'); // deprecated
+var options = {
+    useMongoClient: true,
+    autoIndex: false, // Don't build indexes
+    reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
+    reconnectInterval: 500, // Reconnect every 500ms
+    poolSize: 10, // Maintain up to 10 socket connections
+    // If not connected, return errors immediately rather than waiting for reconnect
+    bufferMaxEntries: 0
+};
+
+mongoose.connect('mongodb://localhost/psjwt', options ); // deprecated
 //mongoose.useMongoClient('mongodb://localhost/psjwt'); // deprecated
 
 var server = app.listen(3000, function(){

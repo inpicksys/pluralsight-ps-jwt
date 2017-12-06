@@ -1,16 +1,24 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs')
+mongoose.Promise = require('bluebird');
 
 var UserSchema = new mongoose.Schema({
     email: String,
     password: String
 });
 
-exports.model  = mongoose.model('User', UserSchema);
+UserSchema.methods.toJSON = function(){
+    var user = this.toObject();
+  //  delete user.password;
+    return user;
+};
+
 
 UserSchema.pre('save', function(next){
+    console.log("saving: %s (%s)", this.user);
     var user = this;
-debugger;
+
+
     if(!user.isModified('password')) return next();
 
     bcrypt.genSalt(10, function(err, salt){
@@ -24,3 +32,6 @@ debugger;
         });
     });
 });
+
+
+exports.model = mongoose.model('User', UserSchema);

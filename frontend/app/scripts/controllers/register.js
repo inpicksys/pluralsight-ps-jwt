@@ -14,6 +14,7 @@ angular.module('psJwtApp')
         method: 'POST',
         data: user
       };
+
       $http(options).then(function(response){
         alert('success', 'Ok!', 'You are now registered' );
       }, function(errResponse){
