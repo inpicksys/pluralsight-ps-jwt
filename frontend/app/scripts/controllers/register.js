@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('psJwtApp')
-  .controller('RegisterCtrl', function ($scope, $rootScope, $http, alert) {
+  .controller('RegisterCtrl', function ($scope, $rootScope, $http, alert, authToken) {
     $scope.submit = function(){
       var url = 'http://localhost:3000/register';
       var user = {
@@ -17,6 +17,7 @@ angular.module('psJwtApp')
 
       $http(options).then(function(response){
         alert('success', 'Ok!', 'You are now registered' );
+        authToken.setToken(res.token);
       }, function(errResponse){
         alert('warning', 'Oops!', 'Could not register' );
       });

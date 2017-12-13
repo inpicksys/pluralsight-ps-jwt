@@ -9,15 +9,13 @@ var UserSchema = new mongoose.Schema({
 
 UserSchema.methods.toJSON = function(){
     var user = this.toObject();
-  //  delete user.password;
+    delete user.password;
     return user;
 };
 
 
 UserSchema.pre('save', function(next){
-    console.log("saving: %s (%s)", this.user);
     var user = this;
-
 
     if(!user.isModified('password')) return next();
 

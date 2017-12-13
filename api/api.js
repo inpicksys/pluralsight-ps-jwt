@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
-
+var jwt = require('./services/jwt.js')
 var User = require('./models/User.js');
 
 var app = express();
@@ -25,8 +25,14 @@ app.post ('/register', function(req, res){
         password: user.password
     });
 
+    var payload = {
+       iss: req.hostname,
+        sub:user._id
+    };
+
+    var token = jwt.encode(payload, 'sh...')
     newUser.save(function(err){
-        res.status(200).send(newUser.toJSON());
+        res.status(200).send({user: newUser.toJSON(), token: token});
     });
 });
 
