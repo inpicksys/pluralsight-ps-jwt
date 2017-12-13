@@ -17,7 +17,7 @@ angular.module('psJwtApp')
 
       $http(options).then(function(response){
         alert('success', 'Ok!', 'You are now registered' );
-        authToken.setToken(res.token);
+        authToken.setToken(response.token);
       }, function(errResponse){
         alert('warning', 'Oops!', 'Could not register' );
       });
