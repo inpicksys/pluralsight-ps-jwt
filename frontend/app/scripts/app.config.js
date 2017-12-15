@@ -15,21 +15,11 @@ angular
          url: '/register',
          templateUrl: '/views/register.html',
           controller: 'RegisterCtrl'
+      }).state('logout',{
+        url: '/logout',
+        controller: 'LogoutCtrl'
       });
-	/*	$routeProvider
-				.when('/', {
-					templateUrl: 'views/main.html',
-					controller: 'MainCtrl',
-				controllerAs: 'main'
-			})
-			.when('/about', {
-				templateUrl: 'views/about.html',
-				controller: 'AboutCtrl',
-				controllerAs: 'about'
-			})
-			.otherwise({
-				redirectTo: '/'
-			});*/
+
 
 });
 
