@@ -1,25 +1,34 @@
-/**
- * Created by Misha on 11/19/2017.
- */
+
 'use strict';
 angular
   .module('psJwtApp')
-  .config(function ($urlRouterProvider, $stateProvider) {
+  .config(function ($urlRouterProvider, $stateProvider, $httpProvider) {
     $urlRouterProvider.otherwise('/');
       $stateProvider
         .state('main', {
           url: '/',
           templateUrl: '/views/main.html'
         })
-        .state('register', {
-         url: '/register',
-         templateUrl: '/views/register.html',
-          controller: 'RegisterCtrl'
-      }).state('logout',{
+
+       .state('register', {
+        url: '/register',
+        templateUrl: '/views/register.html',
+        controller: 'RegisterCtrl'
+      })
+
+        .state('logout',{
         url: '/logout',
         controller: 'LogoutCtrl'
+      })
+
+        .state('jobs',{
+        url: '/jobs',
+        templateUrl: '/views/jobs.html',
+        controller: 'JobsCtrl'
       });
 
+      $httpProvider.interceptors.push('authInterceptor');
+})
 
-});
+  .constant('API_URL', 'http://locahost:3000/');
 

@@ -2,7 +2,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
-var jwt = require('./services/jwt.js')
+//var jwt = require('./services/jwt.js') - our own service
+var jwt = require('jwt-simple');
 var User = require('./models/User.js');
 
 var app = express();
@@ -27,13 +28,41 @@ app.post ('/register', function(req, res){
 
     var payload = {
        iss: req.hostname,
-        sub:user._id
+       sub: newUser.id
     };
 
-    var token = jwt.encode(payload, 'sh...')
+    var token = jwt.encode(payload, 'sh...');
     newUser.save(function(err){
-        res.status(200).send({user: newUser.toJSON(), token: token});
+        res.status(200).send({
+            user: newUser.toJSON(),
+            token: token
+        });
     });
+});
+
+var jobs = [
+    'Cook',
+    'Super Hero',
+    'Unicorn Wisperer',
+    'Toast Inspector'
+];
+
+app.get('/jobs', function(request, response){
+
+    if(!request.headers.authorization) {
+        return response.status(401).send(            {
+                message: 'Yo are not authorized'
+            });
+    }
+
+    var token = request.headers.authorization.split(' ')[1];
+    var payload = jwt.decode(token, "sh...");
+
+    if(!payload.sub) {
+        response.status(401).send({message: 'Authentication failed'});
+    }
+
+    response.json(jobs);
 });
 
 var options = {
