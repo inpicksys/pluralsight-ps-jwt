@@ -21,14 +21,20 @@ angular
         controller: 'LogoutCtrl'
       })
 
-        .state('jobs',{
+       .state('jobs',{
         url: '/jobs',
         templateUrl: '/views/jobs.html',
         controller: 'JobsCtrl'
-      });
+      })
+
+        .state('login',{
+          url: '/login',
+          templateUrl: '/views/login.html',
+          controller: 'LoginCtrl'
+        });
 
       $httpProvider.interceptors.push('authInterceptor');
 })
 
-  .constant('API_URL', 'http://locahost:3000/');
+  .constant('API_URL', "http://127.0.0.1:3000/");
 

@@ -4,11 +4,18 @@ var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 //var jwt = require('./services/jwt.js') - our own service
 var jwt = require('jwt-simple');
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 var User = require('./models/User.js');
 
 var app = express();
 
 app.use(bodyParser.json());
+app.use(passport.initialize());
+
+passport.serializeUser(function(user, done){
+    done(null, user.id);
+});
 
 app.use(function(req, res, next){
     res.header('Access-Control-Allow-Origin', '*');
@@ -18,28 +25,86 @@ app.use(function(req, res, next){
     next();
 });
 
+var strategyOptions = {
+    usernameField: 'email'
+};
 
-app.post ('/register', function(req, res){
-    var user = req.body;
-    var newUser = new User.model({
-        email: user.email,
-        password: user.password
-    });
+var loginStrategy = new LocalStrategy(strategyOptions, function(email, password, done){
 
-    var payload = {
-       iss: req.hostname,
-       sub: newUser.id
+    var searchUser = {
+        email: email
     };
 
-    var token = jwt.encode(payload, 'sh...');
-    newUser.save(function(err){
-        res.status(200).send({
-            user: newUser.toJSON(),
-            token: token
+    User.findOne(searchUser, function(err, user){
+        if(err) return done(err);
+
+        if(!user) {
+            return done(null, false, {message: 'Wrong email/password'});
+        }
+
+        user.comparePasswords(password, function(err, isMatch){
+            if(err) return done(err);
+
+            if (!isMatch) {
+                return done(null, false, {message: 'Wrong email/password'});
+            }
+
+            return done(null, user);
         });
     });
 });
 
+var registerStrategy = new LocalStrategy(strategyOptions, function(email, password, done){
+    var searchUser = {
+        email: email
+    };
+
+    User.findOne(searchUser, function(err, user) {
+        if (err) return done(err);
+
+        if (user) {
+            return done(null, false, {
+                    message: 'Email already exists'
+                });
+        }
+
+
+        var newUser = new User({
+            email: email,
+            password: password
+        });
+
+
+        newUser.save(function (err) {
+            done(null, newUser);
+        });
+    });
+});
+
+passport.use('local-register', registerStrategy);
+passport.use('local-login', loginStrategy);
+
+app.post ('/register', passport.authenticate('local-register'), function(request, response){
+    createSendToken(request.user, response);
+});
+
+app.post('/login',  passport.authenticate('local-login'), function(request, response){
+  createSendToken(request.user, response);
+});
+
+
+function createSendToken(user, response){
+    var payload = {
+        sub: user.id
+    };
+
+    var token = jwt.encode(payload, 'sh...');
+
+    response.status(200).send({
+        user: user.toJSON(),
+        token: token
+    });
+};
 var jobs = [
     'Cook',
     'Super Hero',

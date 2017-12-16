@@ -1,27 +1,16 @@
 'use strict';
 
 angular.module('psJwtApp')
-  .controller('RegisterCtrl', function ($scope, $rootScope, $http, alert, authToken) {
+  .controller('RegisterCtrl', function ($scope, alert, auth) {
     $scope.submit = function(){
-      var url = 'http://localhost:3000/register';
-      var user = {
-        email: $scope.email,
-        password: $scope.password
-      };
-
-      var options = {
-        url: url,
-        method: 'POST',
-        data: user
-      };
-
-      $http(options).then(function(response){
+      auth.register($scope.email, $scope.password).then(function(response){
+        if (response.status == 401) {
+          alert('warning', 'Something went wrong :(', response.message);
+          return;
+        }
         alert('success', 'Account Created!', 'Welcome, ' + response.data.user.email + '!');
-        authToken.setToken(response.data.token);
       }, function(errResponse){
-        alert('warning', 'Oops!', 'Could not register' );
+        alert('warning', 'Something went wrong :(', errResponse.message);
       });
-
-      console.log('working...');
     };
-  });
+});
