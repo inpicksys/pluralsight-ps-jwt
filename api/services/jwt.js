@@ -1,4 +1,4 @@
-var crypto = require('crypto');
+/*var crypto = require('crypto');
 
 exports.encode = function(payload, secret) {
     var algorithm = 'HS256';
@@ -43,4 +43,21 @@ function base64Encode(str) {
 
 function base64Decode(str) {
     return new Buffer(str, 'base64').toString();
-}
+}*/
+
+var jwt = require('jwt-simple');
+var moment = require('moment');
+
+module.exports = function (user, response){
+    var payload = {
+        sub: user.id,
+        exp: moment().add(10, 'days').unix()
+    };
+
+    var token = jwt.encode(payload, 'sh...');
+
+    response.status(200).send({
+        user: user.toJSON(),
+        token: token
+    });
+};

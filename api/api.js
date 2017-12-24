@@ -6,6 +6,11 @@ mongoose.Promise = require('bluebird');
 var jwt = require('jwt-simple');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+//var GoogleStrategy = require('passport-google');
+var requestLib = require('request');
+var facebookAuth = require('./services/facebookAuth.js');
+var createSendToken = require('./services/jwt.js');
+
 var User = require('./models/User.js');
 
 var app = express();
@@ -92,19 +97,9 @@ app.post('/login',  passport.authenticate('local-login'), function(request, resp
   createSendToken(request.user, response);
 });
 
+app.post('/auth/facebook', facebookAuth);
 
-function createSendToken(user, response){
-    var payload = {
-        sub: user.id
-    };
 
-    var token = jwt.encode(payload, 'sh...');
-
-    response.status(200).send({
-        user: user.toJSON(),
-        token: token
-    });
-};
 var jobs = [
     'Cook',
     'Super Hero',
@@ -128,6 +123,47 @@ app.get('/jobs', function(request, response){
     }
 
     response.json(jobs);
+});
+
+app.post('/auth/google', function(req, res){
+
+    var url = 'https://accounts.google.com/o/oauth2/token';
+    var apiUrl = 'https://www.googleapis.com/plus/v1/people/me/openIdConnect';
+
+    var params = {
+        client_id: req.body.clientId,
+        redirect_uri: req.body.redirectUri,
+        code: req.body.code,
+        grant_type: 'authorization_code',
+        client_secret: '1CzAR9FiOzp3S9ormqhkNRih' // not recommended for production, just for teaching purposes
+    };
+
+    //console.log(request.body.code );
+    requestLib.post(url, {
+            json: true,
+            form: params
+        },
+        function(err, response, token){
+            console.log(token);
+            var accessToken = token.access_token;
+            var headers = {
+                Authorization: 'Bearer ' + accessToken
+            }
+
+           requestLib.get({url: apiUrl, headers: headers, json: true}, function(err, response, profile){
+                User.findOne({googleId: profile.sub}, function(err, foundUser ) {
+                    if(foundUser) return createSendToken(foundUser, res);
+
+                    var newUser = new User();
+                    newUser.googleId = profile.sub;
+                    newUser.displayName = profile.name;
+                    newUser.save(function(err){
+                        if(err) return next(err);
+                        createSendToken(newUser, res);
+                    });
+                });
+           });
+    });
 });
 
 var options = {
