@@ -8,7 +8,12 @@ angular.module('psJwtApp')
           alert('warning', 'Something went wrong :( ', res ponse.statusText);
           return;
         }*/
-        alert('success', 'Welcome!', 'Thanks for coming ' + response.data.user.email + '!');
+        var message = 'Thanks for coming ' + response.data.user.email + '!';
+
+        if (!response.data.user.active)
+          message = 'Just a reminder, please activate your account soon :-)';
+
+        alert('success', 'Welcome!', message);
       }).catch(function(errResponse){
         handleError(errResponse);
       });
