@@ -3,7 +3,7 @@
 angular.module('psJwtApp')
   .controller('JobsCtrl', function ($scope, $http, API_URL, alert) {
     var options = {
-      url: 'http://localhost:3000/jobs',
+      url: 'http://localhost:1337/job',
       method: 'GET'
     };
 
