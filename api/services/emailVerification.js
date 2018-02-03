@@ -23,7 +23,7 @@ exports.send = function(email) {
 
     var token = jwt.encode(payload, config.EMAIL_SECRET);
 
-    var transporter = nodemailer.createTransport(smtpTransport({
+    /*var transporter = nodemailer.createTransport(smtpTransport({
        host: 'localhost.com',
        secure: false,
         port:25,
@@ -31,7 +31,7 @@ exports.send = function(email) {
            user: 'misha@localhost.com',
             pass: config.SMTP_PASS
         }
-    }));
+    }));*/
 
     var mailOptions = {
         from: 'Accounts <accounts@localhost.com>',
@@ -41,12 +41,12 @@ exports.send = function(email) {
     };
 
 
-   /* var transporter = nodemailer.createTransport(smtpTransport({
+   var transporter = nodemailer.createTransport(smtpTransport({
         service: 'gmail',
         host: 'smtp.gmail.com',
         auth: {
-            user: 'gmailAcc@gmail.com',
-            pass: '111'
+            user: 'strmisha.s@gmail.com',
+            pass: 'Afyfngbyrakjql112'
         }
     }));
 
@@ -55,7 +55,7 @@ exports.send = function(email) {
         to: email,
         subject: 'psJWT Account Verification',
         html: getHtml(token)
-    };*/
+    };
 
     transporter.sendMail(mailOptions, function(error, info){
         if (error) {
@@ -69,6 +69,8 @@ exports.send = function(email) {
 
 exports.handler = function (req, res) {
     var token = req.query.token;
+    var segments = token.split('.');
+    console.log(segments);
 
     var payload = jwt.decode(token, config.EMAIL_SECRET);
     var email = payload.sub;
